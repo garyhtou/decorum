@@ -5,7 +5,7 @@ module Decorum
       lamp: <<~STR,
          /‾\\ 
         └ X ┘
-         ┌┴┐ 
+         ─┴─ 
       STR
       curio: <<~STR,
          /◠\\ 

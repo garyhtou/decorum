@@ -36,14 +36,14 @@ more in the future:
 ```ruby
 puts Decorum::Scenarios::WelcomeHome.setup.house
 ```
-![image](https://github.com/user-attachments/assets/a857f192-499b-4416-98f3-99a607a17443)
+![image](https://github.com/user-attachments/assets/92440c2d-b7c4-4173-84b9-04a73fa4efe9)
 
 ## Legend
 
 ```
  /‾\       /◠\        ┌-◠-┐    
 └   ┘     |   |       │   │    
- ┌┴┐      └───┘       └───┘    
+ ─┴─      └───┘       └───┘    
 Lamp      Curio    Wall Hanging
 
 M = Modern
