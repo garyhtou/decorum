@@ -52,4 +52,6 @@ R = Retro
 U = Unusual
 
 ◌ = Empty slot (an object slot on the house board with nothing in it)
+
+Color of text corresponds to the color of the object/wall paint
 ```
