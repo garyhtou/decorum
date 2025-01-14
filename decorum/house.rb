@@ -14,5 +14,17 @@ module Decorum
     def objects
       rooms.flat_map(&:objects)
     end
+
+    def to_s
+      delimiter = " " * 5
+      top = Display.join_horizontally([top_left_room.to_s, top_right_room.to_s], delimiter:)
+      bottom = Display.join_horizontally([bottom_left_room.to_s, bottom_right_room.to_s], delimiter:)
+
+      <<~STR
+        #{top}
+
+        #{bottom}
+      STR
+    end
   end
 end

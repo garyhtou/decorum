@@ -26,6 +26,7 @@ GEM
       concurrent-ruby (~> 1.0)
     logger (1.6.5)
     minitest (5.25.4)
+    rainbow (3.1.1)
     securerandom (0.4.1)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
@@ -37,6 +38,7 @@ PLATFORMS
 DEPENDENCIES
   activemodel
   activesupport
+  rainbow
 
 BUNDLED WITH
    2.4.8

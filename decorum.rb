@@ -1,5 +1,6 @@
 require "active_model"
 require "active_support/all"
+require "rainbow"
 
 module Decorum
   COLORS = %i[red blue green yellow]

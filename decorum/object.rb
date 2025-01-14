@@ -20,5 +20,15 @@ module Decorum
     def cool_color?
       %i[green blue].include? name
     end
+
+    def self.to_s(type:, value: " ")
+      # This is a class method to allow for printing missing objects
+      Display.template(type, value)
+    end
+
+    def to_s
+      value = Rainbow(style.to_s.first.upcase).send(color)
+      self.class.to_s(type:, value:)
+    end
   end
 end

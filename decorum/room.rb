@@ -6,8 +6,8 @@ module Decorum
     attr_accessor :name
     validates :name, presence: true, inclusion: { in: NAMES }
 
-    attr_accessor :wall_color
-    validates :wall_color, presence: true, inclusion: { in: Decorum::COLORS }
+    attr_accessor :paint_color
+    validates :paint_color, presence: true, inclusion: { in: Decorum::COLORS }
 
     attr_accessor :lamp
     attr_accessor :curio
@@ -20,12 +20,33 @@ module Decorum
     # end
 
     def objects
-      object_order.map { |object| send(object) }.compact
+      object_order.map { |type| send(type) }.compact
     end
 
     # def has_color?(color)
     #   paint_color == color || objects.map(&:color).include?(color)
     # end
+
+    def to_s
+      objects = object_order.map { |type| [type, send(type)] }.map do |type, object|
+        if object.present?
+          object.to_s
+        else
+          Decorum::Object.to_s(type:, value: "◌")
+        end
+      end
+
+      header = Display.header(
+        Rainbow(name.to_s.titleize).send(paint_color),
+        width: (3 * 5) + (2 * 2) # 3 objects of 5 width; joined by 2 spaces
+      )
+
+      <<~STR
+        #{header}
+        #{Display.join_horizontally(objects, delimiter: "  ")}
+        #{"ERRORS: " + self.errors.full_messages.to_sentence unless self.valid?}
+      STR
+    end
 
   end
 end
