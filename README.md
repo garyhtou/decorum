@@ -6,14 +6,14 @@
 - 📋 Rule Book
   ([PDF](https://media.floodgate.games/rule-books/Decorum-Rule-Book.pdf))
 
-![image](https://m.media-amazon.com/images/S/aplus-media-library-service-media/fb6f183d-6079-4cfa-b612-bb59de28180a.__CR0,0,300,300_PT0_SX300_V1___.png)
-
 Decorum is a board game. The creators describe it as a game of passive aggressive cohabitation.
 
 With limited communication, you cooperate with roommates to decorate your house.
 But there's a catch. Each person as a set of secret conditions that must be met.
 The goal is to decorate the house in a manner that fulfill everyone's conditions
 before the time runs out!
+
+![image](https://m.media-amazon.com/images/S/aplus-media-library-service-media/fb6f183d-6079-4cfa-b612-bb59de28180a.__CR0,0,300,300_PT0_SX300_V1___.png)
 
 ~~Theoretically~~, every scenario (game level) has a solution. But from personal
 experience, we sometimes rip out our hair trying to find said solution.
