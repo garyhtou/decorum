@@ -2,11 +2,13 @@ module Decorum
   class Room
     include ActiveModel::Model
 
-    NAMES = ["Bedroom", "Bathroom", "Kitchen", "Living Room"]
+    NAMES = %i[bedroom bathroom kitchen living_room]
     attr_accessor :name
     validates :name, presence: true, inclusion: { in: NAMES }
 
-    attr_accessor :paint_color
+    attr_accessor :wall_color
+    validates :wall_color, presence: true, inclusion: { in: Decorum::COLORS }
+
     attr_accessor :lamp
     attr_accessor :curio
     attr_accessor :wall_hanging
@@ -21,9 +23,9 @@ module Decorum
       object_order.map { |object| send(object) }.compact
     end
 
-    def has_color?(color)
-      paint_color == color || objects.map(&:color).include?(color)
-    end
+    # def has_color?(color)
+    #   paint_color == color || objects.map(&:color).include?(color)
+    # end
 
   end
 end

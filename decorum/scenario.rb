@@ -9,6 +9,10 @@ module Decorum
 
     attr_accessor :house
 
+    def self.setup
+      raise NotImplementedError, "This method should instantiate a new scenario with the appropriate players and house."
+    end
+
     def players
       [player_one, player_two, player_three, player_four].compact
     end
@@ -17,8 +21,16 @@ module Decorum
       players.length
     end
 
+    def conditions
+      players.to_h do |player|
+        [player, player.conditions]
+      end
+    end
+
     def win?
-      players.all?(&:fulfilled?)
+      players.all? do |player|
+        player.fulfilled?(house:)
+      end
     end
 
   end
