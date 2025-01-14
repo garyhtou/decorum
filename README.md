@@ -6,23 +6,37 @@
 - 📋 Rule Book
   ([PDF](https://media.floodgate.games/rule-books/Decorum-Rule-Book.pdf))
 
-![image](https://github.com/user-attachments/assets/a857f192-499b-4416-98f3-99a607a17443)
+![image](https://m.media-amazon.com/images/S/aplus-media-library-service-media/fb6f183d-6079-4cfa-b612-bb59de28180a.__CR0,0,300,300_PT0_SX300_V1___.png)
+
+Decorum is a board game. The creators describe it as a game of passive aggressive cohabitation.
+
+With limited communication, you cooperate with roommates to decorate your house.
+But there's a catch. Each person as a set of secret conditions that must be met.
+The goal is to decorate the house in a manner that fulfill everyone's conditions
+before the time runs out!
+
+~~Theoretically~~, every scenario (game level) has a solution. But from personal
+experience, we sometimes rip out our hair trying to find said solution.
+
+**So... what is this repo?**
+
+I'm not too sure 🤷‍♂️. It'll likely be a scenario solver but could turn into
+more in the future:
+- Scenario solver
+- Scenario generator
+- Online game
+
+### Current Features
+
+- [x] Solution checker (Validates fulfillment of scenarios)
+- [ ] TODO: Scenario solver (solves a given scenario)
+
+## Getting Started
 
 ```ruby
-Decorum::Scenarios::WelcomeHome.setup.house
+puts Decorum::Scenarios::WelcomeHome.setup.house
 ```
-
-```
-==[  Bathroom   ]==     ==[   Bedroom   ]==
- /◠\   ┌-◠-┐   /‾\      ┌-◠-┐   /‾\    /◠\ 
-| A |  │ M │  └ ◌ ┘     │ ◌ │  └ U ┘  | ◌ |
-└───┘  └───┘   ┌┴┐      └───┘   ┌┴┐   └───┘
-
-==[ Living Room ]==     ==[   Kitchen   ]==
- /◠\    /‾\   ┌-◠-┐      /‾\   ┌-◠-┐   /◠\ 
-| ◌ |  └ R ┘  │ ◌ │     └ ◌ ┘  │ U │  | ◌ |
-└───┘   ┌┴┐   └───┘      ┌┴┐   └───┘  └───┘
-```
+![image](https://github.com/user-attachments/assets/a857f192-499b-4416-98f3-99a607a17443)
 
 ## Legend
 
