@@ -12,5 +12,21 @@ module Decorum
       end
     end
 
+    def ==(other)
+      [:class, :conditions].all? do |attr|
+        self.send(attr) == other.send(attr)
+      end
+    end
+
+    alias_method :eql?, :==
+
+    def initialize_dup(source)
+      conditions.each do |attr|
+        self.send("#{attr}=", source.send(attr).deep_dup)
+      end
+
+      super
+    end
+
   end
 end
