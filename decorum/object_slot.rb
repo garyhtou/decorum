@@ -1,5 +1,5 @@
 module Decorum
-  class Object
+  class ObjectSlot
     include ActiveModel::Model
 
     TYPES = %i[lamp, curio, wall_hanging]
@@ -13,6 +13,10 @@ module Decorum
     attr_accessor :style
     validates :style, inclusion: { in: STYLES }
 
+    def empty? = color.nil? && style.nil?
+
+    def filled? = !empty?
+
     def warm_color?
       %i[red yellow].include? name
     end
@@ -21,14 +25,9 @@ module Decorum
       %i[green blue].include? name
     end
 
-    def self.to_s(type:, value: " ")
-      # This is a class method to allow for printing missing objects
-      Display.template(type, value)
-    end
-
     def to_s
-      value = Rainbow(style.to_s.first.upcase).send(color)
-      self.class.to_s(type:, value:)
+      value = filled? ? Rainbow(style.to_s.first.upcase).send(color) : " "
+      Display.template(type, value)
     end
   end
 end

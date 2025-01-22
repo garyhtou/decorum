@@ -19,8 +19,20 @@ module Decorum
     #   errors.add(:object_order, "must contain all objects") unless object_order.include?(:lamp) && object_order.include?(:curio) && object_order.include?(:wall_hanging)
     # end
 
+    def initialize(...)
+      super(...)
+
+      self.lamp ||= ObjectSlot.new(type: :lamp)
+      self.curio ||= ObjectSlot.new(type: :curio)
+      self.wall_hanging ||= ObjectSlot.new(type: :wall_hanging)
+    end
+
     def objects
-      object_order.map { |type| send(type) }.compact
+      object_slots.select(&:filled?)
+    end
+
+    def object_slots
+      object_order.map { |type| send(type) }
     end
 
     # def has_color?(color)
@@ -28,18 +40,12 @@ module Decorum
     # end
 
     def to_s
-      objects = object_order.map { |type| [type, send(type)] }.map do |type, object|
-        if object.present?
-          object.to_s
-        else
-          Decorum::Object.to_s(type:, value: "◌")
-        end
-      end
-
       header = Display.header(
         Rainbow(name.to_s.titleize).send(paint_color),
         width: (3 * 5) + (2 * 2) # 3 objects of 5 width; joined by 2 spaces
       )
+
+      objects = object_slots.map(&:to_s)
 
       <<~STR
         #{header}

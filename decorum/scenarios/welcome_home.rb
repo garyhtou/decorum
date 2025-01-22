@@ -5,20 +5,20 @@ module Decorum
         house = House::TwoPlayer.new
         house.bathroom.tap do |room|
           room.paint_color = :blue
-          room.curio = Decorum::Object.new(type: :curio, style: :antique, color: :blue)
-          room.wall_hanging = ::Decorum::Object.new(type: :wall_hanging, style: :modern, color: :red)
+          room.curio.assign_attributes(style: :antique, color: :blue)
+          room.wall_hanging.assign_attributes(style: :modern, color: :red)
         end
         house.bedroom.tap do |room|
           room.paint_color = :green
-          room.lamp = Decorum::Object.new(type: :lamp, style: :unique, color: :green)
+          room.lamp.assign_attributes(style: :unique, color: :green)
         end
         house.living_room.tap do |room|
           room.paint_color = :yellow
-          room.lamp = Decorum::Object.new(type: :lamp, style: :retro, color: :red)
+          room.lamp.assign_attributes(style: :retro, color: :red)
         end
         house.kitchen.tap do |room|
           room.paint_color = :red
-          room.wall_hanging = Decorum::Object.new(type: :wall_hanging, style: :unique, color: :yellow)
+          room.wall_hanging.assign_attributes(style: :unique, color: :yellow)
         end
 
         new(
@@ -40,17 +40,17 @@ module Decorum
         House::TwoPlayer.new.tap do |house|
           house.bathroom.tap do |room|
             room.paint_color = :blue
-            room.curio = Decorum::Object.new(type: :curio, style: :retro, color: :yellow)
-            room.wall_hanging = ::Decorum::Object.new(type: :wall_hanging, style: :modern, color: :red)
+            room.curio.assign_attributes(style: :retro, color: :yellow)
+            room.wall_hanging.assign_attributes(style: :modern, color: :red)
           end
           house.bedroom.tap do |room|
             room.paint_color = :green
-            room.lamp = Decorum::Object.new(type: :lamp, style: :antique, color: :yellow)
+            room.lamp.assign_attributes(style: :antique, color: :yellow)
           end
           house.living_room.tap do |room|
             room.paint_color = :blue
-            room.curio = Decorum::Object.new(type: :curio, style: :unusual, color: :red)
-            room.wall_hanging = Decorum::Object.new(type: :wall_hanging, style: :retro, color: :blue)
+            room.curio.assign_attributes(style: :unusual, color: :red)
+            room.wall_hanging.assign_attributes(style: :retro, color: :blue)
           end
           house.kitchen.tap do |room|
             room.paint_color = :red
