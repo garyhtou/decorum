@@ -2,7 +2,7 @@ module Decorum
   class ObjectSlot
     include ActiveModel::Model
 
-    TYPES = %i[lamp, curio, wall_hanging]
+    TYPES = %i[lamp curio wall_hanging]
     attr_accessor :type
     validates :type, presence: true, inclusion: { in: TYPES }
 
