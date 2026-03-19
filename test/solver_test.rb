@@ -125,39 +125,30 @@ class SolverTest < Minitest::Test
       ])
     )
 
-    solver = Decorum::Solver.new(scenario)
-    detected = solver.send(:detect_required_rooms,
-      Decorum::Conditions::KitchenNoObjects.new,
-      scenario.player_one
-    )
+    space = Decorum::SearchSpace.new(scenario)
+    kitchen_entry = space.condition_entries.find { |e| e[:condition].is_a?(Decorum::Conditions::KitchenNoObjects) }
 
-    assert_equal [:bottom_right_room], detected
+    assert_equal [:bottom_right_room], kitchen_entry[:required_rooms]
   end
 
   def test_room_detection_for_two_room_condition
     scenario = Decorum::Scenarios::WelcomeHome.setup
-    solver = Decorum::Solver.new(scenario)
+    space = Decorum::SearchSpace.new(scenario)
 
-    detected = solver.send(:detect_required_rooms,
-      Decorum::Conditions::LeftPaintedBlue.new,
-      scenario.player_two
-    )
+    entry = space.condition_entries.find { |e| e[:condition].is_a?(Decorum::Conditions::LeftPaintedBlue) }
 
-    assert_includes detected, :top_left_room
-    assert_includes detected, :bottom_left_room
-    assert_equal 2, detected.size
+    assert_includes entry[:required_rooms], :top_left_room
+    assert_includes entry[:required_rooms], :bottom_left_room
+    assert_equal 2, entry[:required_rooms].size
   end
 
   def test_room_detection_for_house_wide_condition
     scenario = Decorum::Scenarios::WelcomeHome.setup
-    solver = Decorum::Solver.new(scenario)
+    space = Decorum::SearchSpace.new(scenario)
 
-    detected = solver.send(:detect_required_rooms,
-      Decorum::Conditions::MaxOneAntique.new,
-      scenario.player_one
-    )
+    entry = space.condition_entries.find { |e| e[:condition].is_a?(Decorum::Conditions::MaxOneAntique) }
 
-    assert_equal 4, detected.size
+    assert_equal 4, entry[:required_rooms].size
   end
 end
 
