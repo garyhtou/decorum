@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+Dir.glob(File.join(__dir__, "../test/*_test.rb")) do |file|
+  require file
+end
