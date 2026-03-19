@@ -29,7 +29,8 @@ more in the future:
 ### Current Features
 
 - [x] Solution checker (Validates fulfillment of scenarios)
-- [ ] TODO: Scenario solver (solves a given scenario)
+- [x] Scenario solver (given scenario, returns a solution)
+- [ ] TODO: Scenario generator
 
 ## Getting Started
 
