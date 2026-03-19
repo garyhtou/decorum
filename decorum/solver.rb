@@ -14,8 +14,7 @@ module Decorum
       determine_room_order
       setup_condition_triggers
 
-      house = @scenario.house.class.new
-      House::ROOMS.each { |r| house.send("#{r}=", nil) }
+      house = @scenario.house.class.new.clear!
 
       if backtrack(house, 0)
         house.deep_dup
@@ -78,24 +77,55 @@ module Decorum
       end
     end
 
-    # Probe a condition to discover which room accessors it calls
+    # Probe a condition to discover which room accessors it calls.
+    # Runs multiple probes with different house states to handle short-circuit
+    # evaluation (e.g., `a && b` skips b when a is false).
     def detect_required_rooms(condition, player)
-      probe_house = @scenario.house.deep_dup
       accessed = Set.new
 
-      House::ROOMS.each do |room_sym|
-        original_room = probe_house.send(room_sym)
-        probe_house.define_singleton_method(room_sym) do
-          accessed << room_sym
-          original_room
+      probe_houses(condition).each do |probe_house|
+        House::ROOMS.each do |room_sym|
+          original_room = probe_house.send(room_sym)
+          probe_house.define_singleton_method(room_sym) do
+            accessed << room_sym
+            original_room
+          end
         end
+
+        condition.fulfilled?(player: player, house: probe_house) rescue nil
       end
 
-      condition.fulfilled?(player: player, house: probe_house)
-      accessed.to_a
+      accessed.empty? ? House::ROOMS.dup : accessed.to_a
     rescue
-      # If probing fails, conservatively assume all rooms are needed
       House::ROOMS.dup
+    end
+
+    # Build probe houses with varied states to maximize branch coverage
+    def probe_houses(condition)
+      houses = [@scenario.house.deep_dup]
+
+      # Second probe: invert paint colors and fill/empty all objects
+      alt = @scenario.house.deep_dup
+      House::ROOMS.each do |room_sym|
+        room = alt.send(room_sym)
+        next unless room
+
+        # Swap paint to a different color
+        room.paint_color = (Decorum::COLORS - [room.paint_color]).first
+        # Toggle objects: fill empty slots, empty filled slots
+        Room::OBJECTS.each do |obj_type|
+          slot = room.send(obj_type)
+          if slot.empty?
+            combo = ObjectSlot::COMBINATIONS[obj_type].first
+            slot.assign_attributes(combo)
+          else
+            slot.assign_attributes(color: nil, style: nil)
+          end
+        end
+      end
+      houses << alt
+
+      houses
     end
 
     # Filter domains using conditions that depend on a single room
@@ -107,12 +137,15 @@ module Decorum
         position = required.first
         next unless @domains.key?(position)
 
-        dummy_house = @scenario.house.class.new
-        House::ROOMS.each { |r| dummy_house.send("#{r}=", nil) }
+        dummy_house = @scenario.house.class.new.clear!
 
         @domains[position].select! do |room_state|
           dummy_house.send("#{position}=", room_state)
-          entry[:condition].fulfilled?(player: entry[:player], house: dummy_house)
+          begin
+            entry[:condition].fulfilled?(player: entry[:player], house: dummy_house)
+          rescue NoMethodError
+            true # misdetected as unary, keep the state
+          end
         end
       end
     end

@@ -8,11 +8,11 @@ module Decorum
     validates :type, presence: true, inclusion: { in: TYPES }
 
     attr_accessor :color
-    validates :color, inclusion: { in: ::Decorum::COLORS }
+    validates :color, inclusion: { in: ::Decorum::COLORS }, allow_nil: true
 
     STYLES = %i[modern antique retro unusual]
     attr_accessor :style
-    validates :style, inclusion: { in: STYLES }
+    validates :style, inclusion: { in: STYLES }, allow_nil: true
 
     humanized_name_for :type, :color, :style
 

@@ -21,10 +21,7 @@ module Decorum
     alias_method :eql?, :==
 
     def initialize_dup(source)
-      conditions.each do |attr|
-        self.send("#{attr}=", source.send(attr).deep_dup)
-      end
-
+      self.conditions = source.conditions.map(&:dup)
       super
     end
 

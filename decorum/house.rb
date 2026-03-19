@@ -8,6 +8,11 @@ module Decorum
     attr_accessor :bottom_left_room
     attr_accessor :bottom_right_room
 
+    def clear!
+      ROOMS.each { |r| send("#{r}=", nil) }
+      self
+    end
+
     def rooms
       ROOMS.map { |room| send(room) }.compact
     end
