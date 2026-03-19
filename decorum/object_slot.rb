@@ -2,7 +2,6 @@ module Decorum
   class ObjectSlot
     include ActiveModel::Model
     include HumanizedName
-    include GeneratableChoices
 
     TYPES = %i[lamp curio wall_hanging]
     attr_accessor :type
@@ -54,11 +53,6 @@ module Decorum
       %i[green blue].include? name
     end
 
-    def possible_choices
-      # Allows for removing, adding, or replacing object of the same type
-      generate_choices(COMBINATIONS[type])
-    end
-
     def description
       return "empty #{humanized_type}" if empty?
 
@@ -72,6 +66,10 @@ module Decorum
     end
 
     alias_method :eql?, :==
+
+    def hash
+      [:type, :color, :style].map { |attr| self.send(attr) }.hash
+    end
 
     def to_s
       value = filled? ? Rainbow(style.to_s.first.upcase).send(color) : " "

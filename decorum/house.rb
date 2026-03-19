@@ -1,7 +1,6 @@
 module Decorum
   class House
     include ActiveModel::Model
-    include GeneratableChoices
 
     ROOMS = %i[top_left_room top_right_room bottom_left_room bottom_right_room].freeze
     attr_accessor :top_left_room
@@ -17,14 +16,6 @@ module Decorum
       rooms.flat_map(&:objects)
     end
 
-    def possible_choices
-      choices = ROOMS.flat_map do |room|
-        self.send(room).possible_choices.map { |choice| { room => choice } }
-      end
-
-      generate_choices(choices)
-    end
-
     def description
       rooms.map(&:description).join(".\n")
     end
@@ -36,6 +27,10 @@ module Decorum
     end
 
     alias_method :eql?, :==
+
+    def hash
+      [*ROOMS].map { |attr| self.send(attr) }.hash
+    end
 
     def initialize_dup(source)
       ROOMS.each do |attr|

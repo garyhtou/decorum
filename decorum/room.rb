@@ -2,7 +2,6 @@ module Decorum
   class Room
     include ActiveModel::Model
     include HumanizedName
-    include GeneratableChoices
 
     NAMES = %i[bedroom bathroom kitchen living_room]
     attr_accessor :name
@@ -45,19 +44,6 @@ module Decorum
     #   paint_color == color || objects.map(&:color).include?(color)
     # end
 
-    def possible_choices
-      choices = ::Decorum::COLORS.map { |color| { paint_color: color } }
-
-      OBJECTS.each do |object|
-        # For each object (lamp, curio, wall hanging), get all possible choices
-        self.send(object).possible_choices.each do |choice|
-          choices << { object => choice }
-        end
-      end
-
-      generate_choices(choices)
-    end
-
     def description
       list = ["#{humanized_paint_color} paint"]
       list.concat(objects.map(&:description))
@@ -71,6 +57,10 @@ module Decorum
     end
 
     alias_method :eql?, :==
+
+    def hash
+      [:name, :paint_color, *OBJECTS, :object_order].map { |attr| self.send(attr) }.hash
+    end
 
     def initialize_dup(source)
       [*OBJECTS, :object_order].each do |attr|

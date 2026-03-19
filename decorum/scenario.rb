@@ -28,9 +28,11 @@ module Decorum
       end
     end
 
-    def win?
+    def win?(using_house: nil)
+      using_house ||= self.house
+
       players.all? do |player|
-        player.fulfilled?(house:)
+        player.fulfilled?(house: using_house)
       end
     end
 
