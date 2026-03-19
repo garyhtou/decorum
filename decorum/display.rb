@@ -41,7 +41,6 @@ module Decorum
     def self.join_horizontally(strings, delimiter: " ")
       lines = strings.map { |s| s.split("\n") }
       max_width = lines.map(&:size).max
-      # this logic is likely flawed, but it seems to work for now
       lines.map! { |line| line + [" "] * (max_width - line.size) } # pad lines
       lines.transpose.map { |lines| lines.join(delimiter) }.join("\n")
     end

@@ -17,9 +17,6 @@ module Decorum
 
     attr_accessor :object_order
     validates :object_order, presence: true, length: { is: 3 }
-    # validate do
-    #   errors.add(:object_order, "must contain all objects") unless object_order.include?(:lamp) && object_order.include?(:curio) && object_order.include?(:wall_hanging)
-    # end
 
     humanized_name_for :name, capitalize: true
     humanized_name_for :paint_color
