@@ -150,6 +150,40 @@ class SolverTest < Minitest::Test
 
     assert_equal 4, entry[:required_rooms].size
   end
+
+  def test_solves_scenario_with_no_conditions
+    house = Decorum::House::TwoPlayer.new
+    Decorum::House::ROOMS.each { |r| house.send(r).paint_color = :red }
+
+    scenario = Decorum::Scenario.new(
+      house: house,
+      player_one: Decorum::Player.new(conditions: [])
+    )
+
+    solution = Decorum::Solver.new(scenario).run
+
+    assert solution, "Should find a solution when there are no conditions"
+  end
+
+  def test_solves_with_single_player
+    house = Decorum::House::TwoPlayer.new
+    Decorum::House::ROOMS.each { |r| house.send(r).paint_color = :red }
+
+    scenario = Decorum::Scenario.new(
+      house: house,
+      player_one: Decorum::Player.new(conditions: [
+        Decorum::Conditions::LeftPaintedBlue.new,
+        Decorum::Conditions::KitchenNoObjects.new,
+      ])
+    )
+
+    solution = Decorum::Solver.new(scenario).run
+
+    assert solution
+    assert_equal :blue, solution.top_left_room.paint_color
+    assert_equal :blue, solution.bottom_left_room.paint_color
+    assert_empty solution.bottom_right_room.objects
+  end
 end
 
 # A condition that contradicts LeftPaintedBlue (for unsolvable test)

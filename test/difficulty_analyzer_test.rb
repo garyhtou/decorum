@@ -93,6 +93,54 @@ class DifficultyAnalyzerTest < Minitest::Test
     assert report[:solution_count] <= 2
     assert report[:solution_count_capped]
   end
+
+  def test_trivial_scenario_has_low_difficulty
+    house = Decorum::House::TwoPlayer.new
+    Decorum::House::ROOMS.each { |r| house.send(r).paint_color = :red }
+
+    scenario = Decorum::Scenario.new(
+      house: house,
+      player_one: Decorum::Player.new(conditions: [])
+    )
+
+    report = Decorum::DifficultyAnalyzer.new(scenario, solution_cap: 100).analyze
+
+    assert report[:solution_count] > 0
+    assert report[:min_moves] >= 0
+    assert report[:difficulty_score] < 0.5, "Trivial scenario should have low difficulty"
+  end
+
+  def test_move_distance_zero_when_initial_is_solution
+    house = Decorum::House::TwoPlayer.new
+    Decorum::House::ROOMS.each { |r| house.send(r).paint_color = :red }
+
+    scenario = Decorum::Scenario.new(
+      house: house,
+      player_one: Decorum::Player.new(conditions: [])
+    )
+
+    report = Decorum::DifficultyAnalyzer.new(scenario, solution_cap: 1).analyze
+
+    assert_equal 0, report[:min_moves]
+  end
+
+  def test_condition_locality_all_house_wide
+    house = Decorum::House::TwoPlayer.new
+    Decorum::House::ROOMS.each { |r| house.send(r).paint_color = :red }
+
+    scenario = Decorum::Scenario.new(
+      house: house,
+      player_one: Decorum::Player.new(conditions: [
+        Decorum::Conditions::MaxOneAntique.new
+      ])
+    )
+
+    report = Decorum::DifficultyAnalyzer.new(scenario, solution_cap: 1).analyze
+
+    assert_equal 1, report[:condition_locality][:house_wide]
+    assert_equal 0, report[:condition_locality][:single_room]
+    assert_equal 0, report[:condition_locality][:two_room]
+  end
 end
 
 # Reuse from solver_test.rb

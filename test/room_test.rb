@@ -79,4 +79,49 @@ class RoomTest < Minitest::Test
 
     assert_equal a.hash, b.hash
   end
+
+  def test_description_empty_room
+    desc = @room.description
+
+    assert_includes desc, "Kitchen"
+    assert_includes desc, "red paint"
+  end
+
+  def test_description_with_objects
+    @room.lamp.assign_attributes(color: :blue, style: :modern)
+    desc = @room.description
+
+    assert_includes desc, "blue modern lamp"
+  end
+
+  def test_objects_constant_matches_object_slot_types
+    assert_equal Decorum::ObjectSlot::TYPES, Decorum::Room::OBJECTS
+  end
+
+  def test_valid_room_names_include_four_player_names
+    assert_includes Decorum::Room::NAMES, :bedroom_a
+    assert_includes Decorum::Room::NAMES, :bedroom_b
+  end
+
+  def test_all_objects_filled
+    @room.lamp.assign_attributes(color: :blue, style: :modern)
+    @room.curio.assign_attributes(color: :green, style: :modern)
+    @room.wall_hanging.assign_attributes(color: :red, style: :modern)
+
+    assert_equal 3, @room.objects.size
+  end
+
+  # --- Paint validation (rulebook: wall color always has a color) ---
+
+  def test_nil_paint_color_fails_validation
+    room = Decorum::Room.new(name: :kitchen, paint_color: nil, object_order: %i[lamp curio wall_hanging])
+
+    refute room.valid?
+  end
+
+  def test_invalid_paint_color_fails_validation
+    room = Decorum::Room.new(name: :kitchen, paint_color: :purple, object_order: %i[lamp curio wall_hanging])
+
+    refute room.valid?
+  end
 end

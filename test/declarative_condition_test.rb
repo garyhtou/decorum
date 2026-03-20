@@ -241,6 +241,132 @@ class DeclarativeConditionTest < Minitest::Test
     assert_equal ruby_cond.fulfilled?(player: @player, house: @house), fulfilled?(declarative)
   end
 
+  def test_matches_left_no_lamps
+    declarative = build_condition(scope: "left_side", subject: "lamps", assertion: { count: { max: 0 } })
+    ruby_cond = Decorum::Conditions::LeftNoLamps.new
+
+    assert_equal ruby_cond.fulfilled?(player: @player, house: @house), fulfilled?(declarative)
+
+    @house.bathroom.lamp.assign_attributes(color: :blue, style: :modern)
+    assert_equal ruby_cond.fulfilled?(player: @player, house: @house), fulfilled?(declarative)
+  end
+
+  def test_matches_max_one_antique
+    declarative = build_condition(scope: "house", subject: "objects", filter: { style: "antique" }, assertion: { count: { max: 1 } })
+    ruby_cond = Decorum::Conditions::MaxOneAntique.new
+
+    assert_equal ruby_cond.fulfilled?(player: @player, house: @house), fulfilled?(declarative)
+
+    @house.bathroom.curio.assign_attributes(color: :blue, style: :antique)
+    assert_equal ruby_cond.fulfilled?(player: @player, house: @house), fulfilled?(declarative)
+
+    @house.bedroom.wall_hanging.assign_attributes(color: :green, style: :antique)
+    assert_equal ruby_cond.fulfilled?(player: @player, house: @house), fulfilled?(declarative)
+  end
+
+  def test_matches_min_one_antique_yellow_lamp
+    declarative = build_condition(
+      scope: "house", subject: "objects",
+      filter: { type: "lamp", color: "yellow", style: "antique" },
+      assertion: { count: { min: 1 } }
+    )
+    ruby_cond = Decorum::Conditions::MinOneAntiqueYellowLamp.new
+
+    assert_equal ruby_cond.fulfilled?(player: @player, house: @house), fulfilled?(declarative)
+
+    @house.bedroom.lamp.assign_attributes(color: :yellow, style: :antique)
+    assert_equal ruby_cond.fulfilled?(player: @player, house: @house), fulfilled?(declarative)
+  end
+
+  def test_matches_downstairs_min_two_objects
+    declarative = build_condition(scope: "downstairs", subject: "objects", assertion: { count: { min: 2 } })
+    ruby_cond = Decorum::Conditions::DownstairsMinTwoObjects.new
+
+    assert_equal ruby_cond.fulfilled?(player: @player, house: @house), fulfilled?(declarative)
+
+    @house.living_room.lamp.assign_attributes(color: :blue, style: :modern)
+    @house.kitchen.curio.assign_attributes(color: :green, style: :modern)
+    assert_equal ruby_cond.fulfilled?(player: @player, house: @house), fulfilled?(declarative)
+  end
+
+  # --- Error handling ---
+
+  def test_unknown_scope_raises
+    cond = build_condition(scope: "garage", subject: "objects", assertion: { count: { min: 0 } })
+
+    assert_raises(ArgumentError) { fulfilled?(cond) }
+  end
+
+  def test_unknown_subject_raises
+    cond = build_condition(scope: "house", subject: "windows", assertion: { count: { min: 0 } })
+
+    assert_raises(ArgumentError) { fulfilled?(cond) }
+  end
+
+  def test_unknown_assertion_raises
+    cond = build_condition(scope: "house", subject: "objects", assertion: { vibrates: true })
+
+    assert_raises(ArgumentError) { fulfilled?(cond) }
+  end
+
+  # --- Declarative equality ---
+
+  def test_equality
+    a = build_condition(scope: "house", subject: "objects", assertion: { count: { min: 1 } })
+    b = build_condition(scope: "house", subject: "objects", assertion: { count: { min: 1 } })
+
+    assert_equal a, b
+  end
+
+  def test_inequality
+    a = build_condition(scope: "house", subject: "objects", assertion: { count: { min: 1 } })
+    b = build_condition(scope: "kitchen", subject: "objects", assertion: { count: { min: 1 } })
+
+    refute_equal a, b
+  end
+
+  # --- Wall hangings / curios subjects ---
+
+  def test_curios_subject
+    cond = build_condition(scope: "house", subject: "curios", assertion: { count: { min: 1 } })
+    refute fulfilled?(cond)
+
+    @house.bathroom.curio.assign_attributes(color: :green, style: :modern)
+    assert fulfilled?(cond)
+  end
+
+  def test_wall_hangings_subject
+    cond = build_condition(scope: "house", subject: "wall_hangings", assertion: { count: { min: 1 } })
+    refute fulfilled?(cond)
+
+    @house.bathroom.wall_hanging.assign_attributes(color: :red, style: :modern)
+    assert fulfilled?(cond)
+  end
+
+  # --- "Feature" = objects + wall paint (rulebook definition) ---
+
+  def test_features_includes_wall_paint_color
+    @house.bathroom.paint_color = :green
+
+    cond = build_condition(scope: "bathroom", subject: "features", assertion: { includes: "green" })
+    assert fulfilled?(cond)
+  end
+
+  def test_features_includes_object_color
+    @house.bathroom.lamp.assign_attributes(color: :blue, style: :modern)
+
+    cond = build_condition(scope: "bathroom", subject: "features", assertion: { includes: "blue" })
+    assert fulfilled?(cond)
+  end
+
+  def test_features_does_not_include_styles
+    @house.bathroom.lamp.assign_attributes(color: :blue, style: :modern)
+
+    # "modern" is a style, not a color — features should not include it
+    cond = build_condition(scope: "bathroom", subject: "features", assertion: { includes: "modern" })
+    refute fulfilled?(cond)
+  end
+
   private
 
   def build_condition(**definition)

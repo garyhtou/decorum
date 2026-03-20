@@ -121,4 +121,90 @@ class ObjectSlotTest < Minitest::Test
 
     assert_equal "empty curio", slot.description
   end
+
+  # --- warm_color? / cool_color? ---
+
+  def test_warm_color_red
+    slot = Decorum::ObjectSlot.new(type: :lamp, color: :red, style: :retro)
+
+    assert slot.warm_color?
+    refute slot.cool_color?
+  end
+
+  def test_warm_color_yellow
+    slot = Decorum::ObjectSlot.new(type: :lamp, color: :yellow, style: :antique)
+
+    assert slot.warm_color?
+    refute slot.cool_color?
+  end
+
+  def test_cool_color_blue
+    slot = Decorum::ObjectSlot.new(type: :lamp, color: :blue, style: :modern)
+
+    assert slot.cool_color?
+    refute slot.warm_color?
+  end
+
+  def test_cool_color_green
+    slot = Decorum::ObjectSlot.new(type: :lamp, color: :green, style: :unusual)
+
+    assert slot.cool_color?
+    refute slot.warm_color?
+  end
+
+  def test_empty_slot_is_neither_warm_nor_cool
+    slot = Decorum::ObjectSlot.new(type: :lamp)
+
+    refute slot.warm_color?
+    refute slot.cool_color?
+  end
+
+  # --- Rulebook invariants ---
+
+  def test_colors_constant_matches_rulebook
+    assert_equal %i[red blue green yellow].sort, Decorum::COLORS.sort
+  end
+
+  def test_styles_constant_matches_rulebook
+    assert_equal %i[modern antique retro unusual].sort, Decorum::ObjectSlot::STYLES.sort
+  end
+
+  def test_types_constant_matches_rulebook
+    assert_equal %i[lamp curio wall_hanging].sort, Decorum::ObjectSlot::TYPES.sort
+  end
+
+  def test_exactly_12_total_valid_objects
+    total = Decorum::ObjectSlot::COMBINATIONS.values.sum(&:size)
+
+    assert_equal 12, total
+  end
+
+  def test_each_type_has_all_four_colors
+    Decorum::ObjectSlot::TYPES.each do |type|
+      colors = Decorum::ObjectSlot::COMBINATIONS[type].map { |c| c[:color] }.sort
+
+      assert_equal Decorum::COLORS.sort, colors,
+        "Expected #{type} to have all 4 colors"
+    end
+  end
+
+  def test_each_type_has_all_four_styles
+    Decorum::ObjectSlot::TYPES.each do |type|
+      styles = Decorum::ObjectSlot::COMBINATIONS[type].map { |c| c[:style] }.sort
+
+      assert_equal Decorum::ObjectSlot::STYLES.sort, styles,
+        "Expected #{type} to have all 4 styles"
+    end
+  end
+
+  def test_no_red_antique_exists
+    # Rulebook: "There are no red antiques"
+    Decorum::ObjectSlot::TYPES.each do |type|
+      red_antique = Decorum::ObjectSlot::COMBINATIONS[type].find do |c|
+        c[:color] == :red && c[:style] == :antique
+      end
+
+      assert_nil red_antique, "Expected no red antique #{type} to exist"
+    end
+  end
 end

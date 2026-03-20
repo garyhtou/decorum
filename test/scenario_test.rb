@@ -72,4 +72,29 @@ class ScenarioTest < Minitest::Test
 
     assert_equal :blue, scenario.house.bathroom.paint_color
   end
+
+  def test_win_with_no_conditions
+    scenario = Decorum::Scenario.new(
+      house: Decorum::House::TwoPlayer.new,
+      player_one: Decorum::Player.new(conditions: [])
+    )
+
+    assert scenario.win?, "No conditions means always fulfilled"
+  end
+
+  def test_num_players_with_four
+    scenario = Decorum::Scenario.new(
+      house: Decorum::House::FourPlayer.new,
+      player_one: Decorum::Player.new(conditions: []),
+      player_two: Decorum::Player.new(conditions: []),
+      player_three: Decorum::Player.new(conditions: []),
+      player_four: Decorum::Player.new(conditions: []),
+    )
+
+    assert_equal 4, scenario.num_players
+  end
+
+  def test_setup_raises_on_base_class
+    assert_raises(NotImplementedError) { Decorum::Scenario.setup }
+  end
 end

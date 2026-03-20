@@ -106,4 +106,32 @@ class ScenarioLoaderTest < Minitest::Test
     assert_equal 2, scenario.num_players
     assert scenario.win?(using_house: Decorum::Scenarios::WelcomeHome.solution)
   end
+
+  def test_unknown_house_type_raises
+    json = '{"house_type": "three_player", "initial_state": {}, "players": []}'
+
+    assert_raises(ArgumentError) { Decorum::ScenarioLoader.load(json) }
+  end
+
+  def test_unknown_room_name_raises
+    json = '{"house_type": "two_player", "initial_state": {"garage": {"paint_color": "red"}}, "players": []}'
+
+    assert_raises(ArgumentError) { Decorum::ScenarioLoader.load(json) }
+  end
+
+  def test_empty_scenario
+    json = '{"house_type": "two_player", "initial_state": {}, "players": []}'
+    scenario = Decorum::ScenarioLoader.load(json)
+
+    assert_equal 0, scenario.num_players
+    assert_kind_of Decorum::House::TwoPlayer, scenario.house
+  end
+
+  def test_scenario_with_no_initial_objects
+    json = '{"house_type": "two_player", "initial_state": {"bathroom": {"paint_color": "blue"}}, "players": []}'
+    scenario = Decorum::ScenarioLoader.load(json)
+
+    assert_equal :blue, scenario.house.top_left_room.paint_color
+    assert scenario.house.top_left_room.lamp.empty?
+  end
 end

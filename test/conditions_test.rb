@@ -107,6 +107,55 @@ class ConditionsTest < Minitest::Test
     refute fulfilled?(Decorum::Conditions::DownstairsMinTwoObjects.new)
   end
 
+  def test_downstairs_min_two_objects_with_three
+    @house.bottom_left_room.lamp.assign_attributes(color: :blue, style: :modern)
+    @house.bottom_left_room.curio.assign_attributes(color: :green, style: :modern)
+    @house.bottom_right_room.wall_hanging.assign_attributes(color: :red, style: :modern)
+
+    assert fulfilled?(Decorum::Conditions::DownstairsMinTwoObjects.new)
+  end
+
+  # --- LeftNoLamps (partial) ---
+
+  def test_left_no_lamps_one_empty_one_filled
+    @house.bottom_left_room.lamp.assign_attributes(color: :blue, style: :modern)
+
+    refute fulfilled?(Decorum::Conditions::LeftNoLamps.new)
+  end
+
+  # --- MinOneAntiqueYellowLamp (edge cases) ---
+
+  def test_min_one_antique_yellow_lamp_antique_curio_not_lamp
+    # Antique yellow exists but is not a lamp
+    @house.top_left_room.curio.assign_attributes(color: :yellow, style: :retro)
+
+    refute fulfilled?(Decorum::Conditions::MinOneAntiqueYellowLamp.new)
+  end
+
+  def test_min_one_antique_yellow_lamp_with_two
+    @house.top_left_room.lamp.assign_attributes(color: :yellow, style: :antique)
+    @house.top_right_room.lamp.assign_attributes(color: :yellow, style: :antique)
+
+    assert fulfilled?(Decorum::Conditions::MinOneAntiqueYellowLamp.new)
+  end
+
+  # --- KitchenNoObjects (partial fill) ---
+
+  def test_kitchen_no_objects_with_multiple_objects
+    @house.bottom_right_room.lamp.assign_attributes(color: :blue, style: :modern)
+    @house.bottom_right_room.curio.assign_attributes(color: :green, style: :modern)
+
+    refute fulfilled?(Decorum::Conditions::KitchenNoObjects.new)
+  end
+
+  # --- Base Condition ---
+
+  def test_base_condition_raises_not_implemented
+    assert_raises(NotImplementedError) do
+      Decorum::Condition.new.fulfilled?(player: @player, house: @house)
+    end
+  end
+
   private
 
   def fulfilled?(condition)
