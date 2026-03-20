@@ -54,7 +54,7 @@ module Decorum
     def configure_room(room, data)
       room.paint_color = data[:paint_color].to_sym if data[:paint_color]
 
-      %i[lamp curio wall_hanging].each do |slot_type|
+      ObjectSlot::TYPES.each do |slot_type|
         next unless data[slot_type]
 
         slot_data = data[slot_type]
