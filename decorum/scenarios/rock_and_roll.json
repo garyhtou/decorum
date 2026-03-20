@@ -1,0 +1,44 @@
+{
+  "name": "Rock & Roll",
+  "house_type": "two_player",
+  "initial_state": {
+    "bathroom": {
+      "paint_color": "red",
+      "lamp": { "color": "red", "style": "retro" }
+    },
+    "bedroom": {
+      "paint_color": "yellow",
+      "wall_hanging": { "color": "red", "style": "modern" },
+      "lamp": { "color": "red", "style": "retro" },
+      "curio": { "color": "yellow", "style": "retro" }
+    },
+    "living_room": {
+      "paint_color": "red",
+      "curio": { "color": "green", "style": "modern" },
+      "lamp": { "color": "blue", "style": "modern" }
+    },
+    "kitchen": {
+      "paint_color": "blue",
+      "lamp": { "color": "green", "style": "unusual" },
+      "curio": { "color": "green", "style": "modern" }
+    }
+  },
+  "players": [
+    {
+      "conditions": [
+        { "scope": "each_room", "subject": "objects", "filter": { "style": "retro" }, "assertion": { "count": { "min": 1 } } },
+        { "scope": "each_room", "subject": "objects", "filter": { "style": "retro" }, "assertion": { "matches_paint": { "attribute": "color" } } },
+        { "scope": "house", "subject": "objects", "filter": { "style": "retro" }, "assertion": { "covers": { "attribute": "type", "values": ["lamp", "curio", "wall_hanging"] } } },
+        { "scope": "downstairs", "subject": "objects", "filter": { "style": "modern" }, "assertion": { "count": { "max": 0 } } }
+      ]
+    },
+    {
+      "conditions": [
+        { "scope": "each_room", "subject": "objects", "assertion": { "all_unique": { "attribute": "style" } } },
+        { "scope": "left_side", "subject": "lamps", "assertion": { "count": { "max": 0 } } },
+        { "scope": "each_room", "subject": "objects", "filter": { "color": "green" }, "assertion": { "count": { "min": 1 } } },
+        { "scope": "right_side", "subject": "paint_color", "assertion": { "equals": "red" } }
+      ]
+    }
+  ]
+}

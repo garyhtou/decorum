@@ -289,6 +289,74 @@ class DeclarativeConditionTest < Minitest::Test
     assert_equal ruby_cond.fulfilled?(player: @player, house: @house), fulfilled?(declarative)
   end
 
+  # --- all_unique assertion ---
+
+  def test_all_unique_passes_when_distinct
+    @house.bathroom.lamp.assign_attributes(color: :blue, style: :modern)
+    @house.bathroom.curio.assign_attributes(color: :blue, style: :antique)
+
+    cond = build_condition(scope: "bathroom", subject: "objects", assertion: { all_unique: { attribute: "style" } })
+    assert fulfilled?(cond)
+  end
+
+  def test_all_unique_fails_when_duplicates
+    @house.bathroom.lamp.assign_attributes(color: :blue, style: :modern)
+    @house.bathroom.curio.assign_attributes(color: :green, style: :modern)
+
+    cond = build_condition(scope: "bathroom", subject: "objects", assertion: { all_unique: { attribute: "style" } })
+    refute fulfilled?(cond)
+  end
+
+  def test_all_unique_passes_with_empty_room
+    cond = build_condition(scope: "bathroom", subject: "objects", assertion: { all_unique: { attribute: "style" } })
+    assert fulfilled?(cond)
+  end
+
+  def test_all_unique_passes_with_single_object
+    @house.bathroom.lamp.assign_attributes(color: :blue, style: :modern)
+
+    cond = build_condition(scope: "bathroom", subject: "objects", assertion: { all_unique: { attribute: "style" } })
+    assert fulfilled?(cond)
+  end
+
+  # --- matches_paint assertion ---
+
+  def test_matches_paint_passes_when_object_color_matches
+    @house.bathroom.paint_color = :blue
+    @house.bathroom.lamp.assign_attributes(color: :blue, style: :modern)
+
+    cond = build_condition(scope: "bathroom", subject: "objects", assertion: { matches_paint: { attribute: "color" } })
+    assert fulfilled?(cond)
+  end
+
+  def test_matches_paint_fails_when_no_match
+    @house.bathroom.paint_color = :green
+    @house.bathroom.lamp.assign_attributes(color: :blue, style: :modern)
+
+    cond = build_condition(scope: "bathroom", subject: "objects", assertion: { matches_paint: { attribute: "color" } })
+    refute fulfilled?(cond)
+  end
+
+  def test_matches_paint_with_filter
+    @house.bathroom.paint_color = :red
+    @house.bathroom.lamp.assign_attributes(color: :red, style: :retro)
+    @house.bathroom.curio.assign_attributes(color: :blue, style: :antique)
+
+    cond = build_condition(
+      scope: "bathroom", subject: "objects",
+      filter: { style: "retro" },
+      assertion: { matches_paint: { attribute: "color" } }
+    )
+    assert fulfilled?(cond), "Red retro lamp matches red paint"
+  end
+
+  def test_matches_paint_fails_with_empty_room
+    @house.bathroom.paint_color = :blue
+
+    cond = build_condition(scope: "bathroom", subject: "objects", assertion: { matches_paint: { attribute: "color" } })
+    refute fulfilled?(cond), "No objects to match paint"
+  end
+
   # --- covers assertion ---
 
   def test_covers_with_simple_values

@@ -32,6 +32,8 @@ decorum/
   scenarios/
     welcome_home.rb           # Scenario 1 (Ruby class with setup + known solution)
     welcome_home.json         # Scenario 1 (JSON format)
+    once_in_a_lifetime.json   # Scenario 2 (JSON format)
+    rock_and_roll.json        # Scenario 3 (JSON format)
   search_space.rb             # Shared search infrastructure (domains, probing, filtering)
   solver.rb                   # CSP backtracking solver (finds first solution)
   difficulty_analyzer.rb      # Exhaustive search + difficulty metrics
@@ -152,8 +154,8 @@ Conditions access the house through its room position accessors (e.g., `house.to
 | `upstairs` / `downstairs` | Top/bottom row (via `House::POSITION_GROUPS`) |
 | `left_side` / `right_side` | Left/right column (via `House::POSITION_GROUPS`) |
 | Room name (e.g., `kitchen`) | Single room (via subclass `ROOM_NAMES`) |
-| `each_room` | Evaluates per-room; all rooms must pass individually |
-| `each_room_upstairs`, etc. | Per-room within a position group |
+| `each_room` | Per-room; internally expanded into separate per-room conditions (grouped for UI) |
+| `each_room_upstairs`, etc. | Per-room within a position group (also expanded) |
 
 ### Subjects
 
@@ -179,6 +181,8 @@ Conditions access the house through its room position accessors (e.g., `house.to
 | `{ "covers": { "values": [...] } }` | All listed values appear in subjects |
 | `{ "covers": { "attribute": "style", "values": [...] } }` | All listed values appear for the given attribute |
 | `{ "unique": { "attribute": "style", "max": N } }` | Distinct values of attribute ≤ N |
+| `{ "all_unique": { "attribute": "style" } }` | All values of attribute are distinct (no duplicates) |
+| `{ "matches_paint": { "attribute": "color" } }` | At least one subject's attribute matches the room's paint color |
 
 ### Filter
 

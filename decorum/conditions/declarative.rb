@@ -9,13 +9,12 @@ module Decorum
 
       def fulfilled?(player:, house:)
         if expandable?
-          # Evaluate per-room: all rooms in scope must pass individually
           expand(house).all? { |c| c.fulfilled?(player: player, house: house) }
         else
           rooms = resolve_scope(house)
           subjects = resolve_subject(rooms)
           subjects = apply_filter(subjects)
-          evaluate_assertion(subjects)
+          evaluate_assertion(subjects, rooms:)
         end
       end
 
@@ -23,12 +22,10 @@ module Decorum
         other.is_a?(self.class) && definition == other.definition
       end
 
-      # Can this condition be expanded into per-room conditions?
       def expandable?
         @definition[:scope].to_s.start_with?("each_room")
       end
 
-      # Expand into per-room conditions. Returns array of Declarative instances.
       def expand(house)
         scope = @definition[:scope].to_sym
         positions = EACH_ROOM_SCOPES[scope] ||
@@ -44,30 +41,23 @@ module Decorum
 
       private
 
-      # --- Scope: which rooms to examine ---
+      # --- Scope ---
 
-      POSITION_SCOPES = {
-        house: %i[top_left_room top_right_room bottom_left_room bottom_right_room],
-        upstairs: %i[top_left_room top_right_room],
-        downstairs: %i[bottom_left_room bottom_right_room],
-        left_side: %i[top_left_room bottom_left_room],
-        right_side: %i[top_right_room bottom_right_room],
-      }.freeze
-
-      # Maps each_room variants to the positions they expand into
       EACH_ROOM_SCOPES = {
-        each_room: POSITION_SCOPES[:house],
-        each_room_upstairs: POSITION_SCOPES[:upstairs],
-        each_room_downstairs: POSITION_SCOPES[:downstairs],
-        each_room_left_side: POSITION_SCOPES[:left_side],
-        each_room_right_side: POSITION_SCOPES[:right_side],
+        each_room: House::ROOMS,
+        each_room_upstairs: House::POSITION_GROUPS[:upstairs],
+        each_room_downstairs: House::POSITION_GROUPS[:downstairs],
+        each_room_left_side: House::POSITION_GROUPS[:left_side],
+        each_room_right_side: House::POSITION_GROUPS[:right_side],
       }.freeze
 
       def resolve_scope(house)
         scope = @definition[:scope].to_sym
 
-        positions = if POSITION_SCOPES.key?(scope)
-                      POSITION_SCOPES[scope]
+        positions = if scope == :house
+                      House::ROOMS
+                    elsif House::POSITION_GROUPS.key?(scope)
+                      House::POSITION_GROUPS[scope]
                     elsif house.class.const_defined?(:ROOM_NAMES) && house.class::ROOM_NAMES.key?(scope)
                       [house.class::ROOM_NAMES[scope]]
                     else
@@ -77,7 +67,7 @@ module Decorum
         positions.map { |pos| house.send(pos) }.compact
       end
 
-      # --- Subject: what values to extract from the rooms ---
+      # --- Subject ---
 
       SLOT_TYPES = { lamps: :lamp, curios: :curio, wall_hangings: :wall_hanging }.freeze
 
@@ -95,31 +85,26 @@ module Decorum
         when :empty_slots
           rooms.flat_map { |r| r.object_slots.select(&:empty?) }
         when :features
-          colors = rooms.map(&:paint_color)
-          object_colors = rooms.flat_map(&:objects).map(&:color)
-          colors + object_colors
+          rooms.map(&:paint_color) + rooms.flat_map(&:objects).map(&:color)
         else
           raise ArgumentError, "Unknown subject: #{@definition[:subject]}"
         end
       end
 
-      # --- Filter: narrow subjects by attribute matches ---
+      # --- Filter ---
 
       def apply_filter(subjects)
         return subjects unless @definition[:filter]
 
         filter = @definition[:filter]
-
         subjects.select do |subject|
-          filter.all? do |attr, value|
-            subject.respond_to?(attr) && subject.send(attr).to_s == value.to_s
-          end
+          filter.all? { |attr, value| subject.respond_to?(attr) && subject.send(attr).to_s == value.to_s }
         end
       end
 
-      # --- Assertion: evaluate the final predicate ---
+      # --- Assertion ---
 
-      def evaluate_assertion(subjects)
+      def evaluate_assertion(subjects, rooms: [])
         assertion = @definition[:assertion]
 
         if assertion.key?(:count)
@@ -136,6 +121,10 @@ module Decorum
           evaluate_covers(subjects, assertion[:covers])
         elsif assertion.key?(:unique)
           evaluate_unique(subjects, assertion[:unique])
+        elsif assertion.key?(:all_unique)
+          extract_values(subjects, assertion[:all_unique][:attribute]).then { |v| v.size == v.uniq.size }
+        elsif assertion.key?(:matches_paint)
+          evaluate_matches_paint(subjects, assertion[:matches_paint], rooms)
         else
           raise ArgumentError, "Unknown assertion: #{assertion.keys}"
         end
@@ -157,29 +146,24 @@ module Decorum
       end
 
       def evaluate_covers(subjects, covers_def)
-        values = covers_def[:values].map(&:to_s)
-        attribute = covers_def[:attribute]
-
-        present = if attribute
-                    subjects.map { |s| s.send(attribute).to_s }
-                  else
-                    subjects.map(&:to_s)
-                  end
-
-        values.all? { |v| present.include?(v) }
+        present = extract_values(subjects, covers_def[:attribute]).map(&:to_s)
+        covers_def[:values].all? { |v| present.include?(v.to_s) }
       end
 
       def evaluate_unique(subjects, unique_def)
-        attribute = unique_def[:attribute]
-        max = unique_def[:max]
+        extract_values(subjects, unique_def[:attribute]).uniq.size <= unique_def[:max]
+      end
 
-        distinct = if attribute
-                     subjects.map { |s| s.send(attribute) }.uniq
-                   else
-                     subjects.uniq
-                   end
+      def evaluate_matches_paint(subjects, matches_paint_def, rooms)
+        return false if rooms.empty? || subjects.empty?
 
-        distinct.size <= max
+        paint_colors = rooms.map(&:paint_color)
+        extract_values(subjects, matches_paint_def[:attribute]).any? { |v| paint_colors.include?(v) }
+      end
+
+      # Extract attribute values from subjects, or use subjects directly
+      def extract_values(subjects, attribute)
+        attribute ? subjects.map { |s| s.send(attribute) } : subjects
       end
     end
   end
