@@ -367,38 +367,64 @@ class DeclarativeConditionTest < Minitest::Test
     assert fulfilled?(cond), "Empty room has 0 distinct styles, which is ≤ 1"
   end
 
-  # --- each_room scope ---
+  # --- each_room expansion ---
 
-  def test_each_room_all_pass
-    # All rooms empty → 0 distinct styles ≤ 1
-    cond = build_condition(
-      scope: "each_room", subject: "objects",
-      assertion: { unique: { attribute: "style", max: 1 } }
-    )
-    assert fulfilled?(cond)
+  def test_expandable
+    cond = build_condition(scope: "each_room", subject: "objects", assertion: { unique: { attribute: "style", max: 1 } })
+
+    assert cond.expandable?
   end
 
-  def test_each_room_one_fails
+  def test_not_expandable
+    cond = build_condition(scope: "house", subject: "objects", assertion: { count: { min: 1 } })
+
+    refute cond.expandable?
+  end
+
+  def test_expand_creates_per_room_conditions
+    cond = build_condition(scope: "each_room", subject: "objects", assertion: { unique: { attribute: "style", max: 1 } })
+    expanded = cond.expand(@house)
+
+    assert_equal 4, expanded.size
+    scopes = expanded.map { |c| c.definition[:scope].to_sym }.sort
+    assert_equal %i[bathroom bedroom kitchen living_room], scopes
+  end
+
+  def test_expand_each_room_downstairs
+    cond = build_condition(scope: "each_room_downstairs", subject: "objects", assertion: { unique: { attribute: "style", max: 1 } })
+    expanded = cond.expand(@house)
+
+    assert_equal 2, expanded.size
+    scopes = expanded.map { |c| c.definition[:scope].to_sym }.sort
+    assert_equal %i[kitchen living_room], scopes
+  end
+
+  def test_expanded_condition_works_per_room
+    cond = build_condition(scope: "each_room", subject: "objects", assertion: { unique: { attribute: "style", max: 1 } })
+    expanded = cond.expand(@house)
+
+    # All rooms empty → all pass
+    expanded.each { |c| assert fulfilled?(c) }
+
+    # Add conflicting styles to bathroom
     @house.bathroom.lamp.assign_attributes(color: :blue, style: :modern)
     @house.bathroom.curio.assign_attributes(color: :blue, style: :antique)
 
-    cond = build_condition(
-      scope: "each_room", subject: "objects",
-      assertion: { unique: { attribute: "style", max: 1 } }
-    )
-    refute fulfilled?(cond), "Bathroom has 2 distinct styles"
+    bathroom_cond = expanded.find { |c| c.definition[:scope].to_sym == :bathroom }
+    bedroom_cond = expanded.find { |c| c.definition[:scope].to_sym == :bedroom }
+
+    refute fulfilled?(bathroom_cond), "Bathroom has 2 distinct styles"
+    assert fulfilled?(bedroom_cond), "Bedroom is still fine"
   end
 
-  def test_each_room_scoped_to_downstairs
-    # Only downstairs rooms checked
+  def test_expanded_downstairs_ignores_upstairs_violation
     @house.bathroom.lamp.assign_attributes(color: :blue, style: :modern)
     @house.bathroom.curio.assign_attributes(color: :blue, style: :antique)
 
-    cond = build_condition(
-      scope: "each_room_downstairs", subject: "objects",
-      assertion: { unique: { attribute: "style", max: 1 } }
-    )
-    assert fulfilled?(cond), "Downstairs rooms are fine, upstairs violation shouldn't matter"
+    cond = build_condition(scope: "each_room_downstairs", subject: "objects", assertion: { unique: { attribute: "style", max: 1 } })
+    expanded = cond.expand(@house)
+
+    expanded.each { |c| assert fulfilled?(c), "Downstairs rooms are fine" }
   end
 
   # --- Error handling ---

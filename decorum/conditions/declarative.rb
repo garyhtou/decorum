@@ -8,10 +8,9 @@ module Decorum
       end
 
       def fulfilled?(player:, house:)
-        scope = @definition[:scope].to_sym
-
-        if scope.to_s.start_with?("each_room")
-          evaluate_each_room(house, scope)
+        if expandable?
+          # Evaluate per-room: all rooms in scope must pass individually
+          expand(house).all? { |c| c.fulfilled?(player: player, house: house) }
         else
           rooms = resolve_scope(house)
           subjects = resolve_subject(rooms)
@@ -22,6 +21,25 @@ module Decorum
 
       def ==(other)
         other.is_a?(self.class) && definition == other.definition
+      end
+
+      # Can this condition be expanded into per-room conditions?
+      def expandable?
+        @definition[:scope].to_s.start_with?("each_room")
+      end
+
+      # Expand into per-room conditions. Returns array of Declarative instances.
+      def expand(house)
+        scope = @definition[:scope].to_sym
+        positions = EACH_ROOM_SCOPES[scope] ||
+          raise(ArgumentError, "Unknown each_room scope: #{scope}")
+
+        positions.filter_map do |pos|
+          room_name = house.class::ROOM_NAMES.key(pos)
+          next unless room_name
+
+          self.class.new(definition: @definition.merge(scope: room_name.to_s))
+        end
       end
 
       private
@@ -36,23 +54,13 @@ module Decorum
         right_side: %i[top_right_room bottom_right_room],
       }.freeze
 
-      # Maps each_room variants to the positions they iterate
+      # Maps each_room variants to the positions they expand into
       EACH_ROOM_SCOPES = {
         each_room: POSITION_SCOPES[:house],
         each_room_upstairs: POSITION_SCOPES[:upstairs],
         each_room_downstairs: POSITION_SCOPES[:downstairs],
         each_room_left_side: POSITION_SCOPES[:left_side],
         each_room_right_side: POSITION_SCOPES[:right_side],
-      }.freeze
-
-      # Room name → position accessor (covers both house types)
-      ROOM_NAME_TO_POSITION = {
-        bathroom: :top_left_room,
-        bedroom: :top_right_room,
-        living_room: :bottom_left_room,
-        kitchen: :bottom_right_room,
-        bedroom_a: :top_left_room,
-        bedroom_b: :top_right_room,
       }.freeze
 
       def resolve_scope(house)
@@ -67,20 +75,6 @@ module Decorum
                     end
 
         positions.map { |pos| house.send(pos) }.compact
-      end
-
-      # Evaluate the condition per-room; all rooms must pass
-      def evaluate_each_room(house, scope)
-        positions = EACH_ROOM_SCOPES[scope] ||
-          raise(ArgumentError, "Unknown each_room scope: #{scope}")
-
-        rooms = positions.map { |pos| house.send(pos) }.compact
-
-        rooms.all? do |room|
-          subjects = resolve_subject([room])
-          subjects = apply_filter(subjects)
-          evaluate_assertion(subjects)
-        end
       end
 
       # --- Subject: what values to extract from the rooms ---
@@ -162,7 +156,6 @@ module Decorum
         valid
       end
 
-      # All listed values must appear among the subjects
       def evaluate_covers(subjects, covers_def)
         values = covers_def[:values].map(&:to_s)
         attribute = covers_def[:attribute]
@@ -176,7 +169,6 @@ module Decorum
         values.all? { |v| present.include?(v) }
       end
 
-      # Distinct values of an attribute must be ≤ max
       def evaluate_unique(subjects, unique_def)
         attribute = unique_def[:attribute]
         max = unique_def[:max]

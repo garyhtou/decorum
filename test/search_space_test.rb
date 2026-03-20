@@ -84,6 +84,96 @@ class SearchSpaceTest < Minitest::Test
     refute @space.safe_check(entry, house)
   end
 
+  def test_each_room_conditions_are_expanded
+    house = Decorum::House::TwoPlayer.new
+    Decorum::House::ROOMS.each { |r| house.send(r).paint_color = :red }
+
+    scenario = Decorum::Scenario.new(
+      house: house,
+      player_one: Decorum::Player.new(conditions: [
+        Decorum::Conditions::Declarative.new(definition: {
+          scope: "each_room", subject: "objects",
+          assertion: { unique: { attribute: "style", max: 1 } }
+        })
+      ])
+    )
+
+    space = Decorum::SearchSpace.new(scenario)
+
+    # 1 each_room condition expands into 4 per-room conditions
+    assert_equal 4, space.condition_entries.size
+  end
+
+  def test_expanded_conditions_share_group_id
+    house = Decorum::House::TwoPlayer.new
+    Decorum::House::ROOMS.each { |r| house.send(r).paint_color = :red }
+
+    scenario = Decorum::Scenario.new(
+      house: house,
+      player_one: Decorum::Player.new(conditions: [
+        Decorum::Conditions::Declarative.new(definition: {
+          scope: "each_room", subject: "objects",
+          assertion: { unique: { attribute: "style", max: 1 } }
+        })
+      ])
+    )
+
+    space = Decorum::SearchSpace.new(scenario)
+
+    groups = space.condition_entries.map { |e| e[:group] }
+    assert groups.all? { |g| g == groups.first }, "All expanded conditions should share the same group"
+    refute_nil groups.first
+  end
+
+  def test_expanded_conditions_store_source_definition
+    house = Decorum::House::TwoPlayer.new
+    Decorum::House::ROOMS.each { |r| house.send(r).paint_color = :red }
+
+    scenario = Decorum::Scenario.new(
+      house: house,
+      player_one: Decorum::Player.new(conditions: [
+        Decorum::Conditions::Declarative.new(definition: {
+          scope: "each_room", subject: "objects",
+          assertion: { unique: { attribute: "style", max: 1 } }
+        })
+      ])
+    )
+
+    space = Decorum::SearchSpace.new(scenario)
+
+    space.condition_entries.each do |entry|
+      assert_equal "each_room", entry[:source_definition][:scope].to_s
+    end
+  end
+
+  def test_non_expandable_conditions_have_nil_group
+    entry = @space.condition_entries.find { |e| e[:group].nil? }
+
+    assert entry, "Non-expanded conditions should have nil group"
+  end
+
+  def test_expanded_conditions_detected_as_single_room
+    house = Decorum::House::TwoPlayer.new
+    Decorum::House::ROOMS.each { |r| house.send(r).paint_color = :red }
+
+    scenario = Decorum::Scenario.new(
+      house: house,
+      player_one: Decorum::Player.new(conditions: [
+        Decorum::Conditions::Declarative.new(definition: {
+          scope: "each_room", subject: "objects",
+          assertion: { unique: { attribute: "style", max: 1 } }
+        })
+      ])
+    )
+
+    space = Decorum::SearchSpace.new(scenario)
+
+    space.condition_entries.each do |entry|
+      assert_equal 1, entry[:required_rooms].size,
+        "Each expanded condition should need exactly 1 room"
+    end
+  end
+
   def test_works_with_no_conditions
     house = Decorum::House::TwoPlayer.new
     Decorum::House::ROOMS.each { |r| house.send(r).paint_color = :red }

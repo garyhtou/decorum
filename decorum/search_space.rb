@@ -71,15 +71,36 @@ module Decorum
       end
     end
 
-    # Collect all conditions paired with their player, and auto-detect required rooms
+    # Collect all conditions paired with their player, and auto-detect required rooms.
+    # Expandable conditions (e.g., each_room) are split into per-room conditions
+    # with a shared group ID for UI grouping.
     def detect_all_required_rooms
+      group_counter = 0
+
       @condition_entries = @scenario.players.flat_map do |player|
-        player.conditions.map do |condition|
-          {
-            condition: condition,
-            player: player,
-            required_rooms: detect_required_rooms(condition, player)
-          }
+        player.conditions.flat_map do |condition|
+          if condition.respond_to?(:expandable?) && condition.expandable?
+            group_id = "group_#{group_counter}"
+            group_counter += 1
+
+            condition.expand(@scenario.house).map do |expanded|
+              {
+                condition: expanded,
+                player: player,
+                required_rooms: detect_required_rooms(expanded, player),
+                group: group_id,
+                source_definition: condition.definition,
+              }
+            end
+          else
+            [{
+              condition: condition,
+              player: player,
+              required_rooms: detect_required_rooms(condition, player),
+              group: nil,
+              source_definition: nil,
+            }]
+          end
         end
       end
     end
