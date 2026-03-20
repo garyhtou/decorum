@@ -289,6 +289,118 @@ class DeclarativeConditionTest < Minitest::Test
     assert_equal ruby_cond.fulfilled?(player: @player, house: @house), fulfilled?(declarative)
   end
 
+  # --- covers assertion ---
+
+  def test_covers_with_simple_values
+    Decorum::House::ROOMS.each_with_index do |r, i|
+      @house.send(r).paint_color = Decorum::COLORS[i]
+    end
+
+    cond = build_condition(
+      scope: "house", subject: "paint_color",
+      assertion: { covers: { values: %w[red blue green yellow] } }
+    )
+    assert fulfilled?(cond)
+  end
+
+  def test_covers_fails_when_value_missing
+    Decorum::House::ROOMS.each { |r| @house.send(r).paint_color = :red }
+
+    cond = build_condition(
+      scope: "house", subject: "paint_color",
+      assertion: { covers: { values: %w[red blue] } }
+    )
+    refute fulfilled?(cond)
+  end
+
+  def test_covers_with_attribute
+    @house.bathroom.lamp.assign_attributes(color: :blue, style: :modern)
+    @house.bedroom.curio.assign_attributes(color: :green, style: :modern)
+    @house.living_room.wall_hanging.assign_attributes(color: :red, style: :modern)
+
+    cond = build_condition(
+      scope: "house", subject: "objects",
+      assertion: { covers: { attribute: "type", values: %w[lamp curio wall_hanging] } }
+    )
+    assert fulfilled?(cond)
+  end
+
+  def test_covers_fails_when_attribute_value_missing
+    @house.bathroom.lamp.assign_attributes(color: :blue, style: :modern)
+
+    cond = build_condition(
+      scope: "house", subject: "objects",
+      assertion: { covers: { attribute: "style", values: %w[modern antique] } }
+    )
+    refute fulfilled?(cond)
+  end
+
+  # --- unique assertion ---
+
+  def test_unique_passes_when_all_same
+    @house.bathroom.lamp.assign_attributes(color: :blue, style: :modern)
+    @house.bathroom.curio.assign_attributes(color: :green, style: :modern)
+
+    cond = build_condition(
+      scope: "bathroom", subject: "objects",
+      assertion: { unique: { attribute: "style", max: 1 } }
+    )
+    assert fulfilled?(cond)
+  end
+
+  def test_unique_fails_when_different
+    @house.bathroom.lamp.assign_attributes(color: :blue, style: :modern)
+    @house.bathroom.curio.assign_attributes(color: :blue, style: :antique)
+
+    cond = build_condition(
+      scope: "bathroom", subject: "objects",
+      assertion: { unique: { attribute: "style", max: 1 } }
+    )
+    refute fulfilled?(cond)
+  end
+
+  def test_unique_passes_with_empty_room
+    cond = build_condition(
+      scope: "bathroom", subject: "objects",
+      assertion: { unique: { attribute: "style", max: 1 } }
+    )
+    assert fulfilled?(cond), "Empty room has 0 distinct styles, which is ≤ 1"
+  end
+
+  # --- each_room scope ---
+
+  def test_each_room_all_pass
+    # All rooms empty → 0 distinct styles ≤ 1
+    cond = build_condition(
+      scope: "each_room", subject: "objects",
+      assertion: { unique: { attribute: "style", max: 1 } }
+    )
+    assert fulfilled?(cond)
+  end
+
+  def test_each_room_one_fails
+    @house.bathroom.lamp.assign_attributes(color: :blue, style: :modern)
+    @house.bathroom.curio.assign_attributes(color: :blue, style: :antique)
+
+    cond = build_condition(
+      scope: "each_room", subject: "objects",
+      assertion: { unique: { attribute: "style", max: 1 } }
+    )
+    refute fulfilled?(cond), "Bathroom has 2 distinct styles"
+  end
+
+  def test_each_room_scoped_to_downstairs
+    # Only downstairs rooms checked
+    @house.bathroom.lamp.assign_attributes(color: :blue, style: :modern)
+    @house.bathroom.curio.assign_attributes(color: :blue, style: :antique)
+
+    cond = build_condition(
+      scope: "each_room_downstairs", subject: "objects",
+      assertion: { unique: { attribute: "style", max: 1 } }
+    )
+    assert fulfilled?(cond), "Downstairs rooms are fine, upstairs violation shouldn't matter"
+  end
+
   # --- Error handling ---
 
   def test_unknown_scope_raises

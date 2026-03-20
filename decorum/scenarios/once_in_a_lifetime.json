@@ -1,0 +1,42 @@
+{
+  "name": "Once in a Lifetime",
+  "house_type": "two_player",
+  "initial_state": {
+    "bathroom": {
+      "paint_color": "blue",
+      "lamp": { "color": "red", "style": "retro" }
+    },
+    "bedroom": {
+      "paint_color": "blue",
+      "curio": { "color": "green", "style": "modern" }
+    },
+    "living_room": {
+      "paint_color": "blue",
+      "curio": { "color": "blue", "style": "antique" },
+      "lamp": { "color": "blue", "style": "modern" },
+      "wall_hanging": { "color": "red", "style": "modern" }
+    },
+    "kitchen": {
+      "paint_color": "blue",
+      "lamp": { "color": "green", "style": "unusual" }
+    }
+  },
+  "players": [
+    {
+      "conditions": [
+        { "scope": "each_room", "subject": "objects", "assertion": { "unique": { "attribute": "style", "max": 1 } } },
+        { "scope": "house", "subject": "objects", "assertion": { "covers": { "attribute": "style", "values": ["modern", "antique", "retro", "unusual"] } } },
+        { "scope": "house", "subject": "objects", "assertion": { "covers": { "attribute": "type", "values": ["lamp", "curio", "wall_hanging"] } } },
+        { "scope": "downstairs", "subject": "paint_color", "assertion": { "covers": { "values": ["yellow", "green"] } } }
+      ]
+    },
+    {
+      "conditions": [
+        { "scope": "each_room", "subject": "objects", "assertion": { "unique": { "attribute": "color", "max": 1 } } },
+        { "scope": "house", "subject": "objects", "assertion": { "covers": { "attribute": "color", "values": ["red", "blue", "green", "yellow"] } } },
+        { "scope": "house", "subject": "paint_color", "assertion": { "covers": { "values": ["red", "blue", "green", "yellow"] } } },
+        { "scope": "house", "subject": "objects", "filter": { "type": "wall_hanging", "color": "green", "style": "antique" }, "assertion": { "count": { "min": 1 } } }
+      ]
+    }
+  ]
+}

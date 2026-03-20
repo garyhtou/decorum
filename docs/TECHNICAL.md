@@ -152,6 +152,8 @@ Conditions access the house through its room position accessors (e.g., `house.to
 | `upstairs` / `downstairs` | Top/bottom row (via `House::POSITION_GROUPS`) |
 | `left_side` / `right_side` | Left/right column (via `House::POSITION_GROUPS`) |
 | Room name (e.g., `kitchen`) | Single room (via subclass `ROOM_NAMES`) |
+| `each_room` | Evaluates per-room; all rooms must pass individually |
+| `each_room_upstairs`, etc. | Per-room within a position group |
 
 ### Subjects
 
@@ -174,6 +176,9 @@ Conditions access the house through its room position accessors (e.g., `house.to
 | `{ "count": { "min": N } }` | Count >= N |
 | `{ "count": { "max": N } }` | Count <= N |
 | `{ "count": { "equals": N } }` | Count == N |
+| `{ "covers": { "values": [...] } }` | All listed values appear in subjects |
+| `{ "covers": { "attribute": "style", "values": [...] } }` | All listed values appear for the given attribute |
+| `{ "unique": { "attribute": "style", "max": N } }` | Distinct values of attribute ≤ N |
 
 ### Filter
 
