@@ -44,6 +44,24 @@ class ObjectSlotTest < Minitest::Test
     refute slot.valid?
   end
 
+  def test_invalid_style
+    slot = Decorum::ObjectSlot.new(type: :lamp, color: :blue, style: :unique)
+
+    refute slot.valid?
+  end
+
+  def test_invalid_color
+    slot = Decorum::ObjectSlot.new(type: :lamp, color: :purple, style: :modern)
+
+    refute slot.valid?
+  end
+
+  def test_invalid_type
+    slot = Decorum::ObjectSlot.new(type: :candle)
+
+    refute slot.valid?
+  end
+
   def test_empty_slot_is_valid
     slot = Decorum::ObjectSlot.new(type: :lamp)
 

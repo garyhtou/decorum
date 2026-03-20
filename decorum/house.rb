@@ -3,6 +3,14 @@ module Decorum
     include ActiveModel::Model
 
     ROOMS = %i[top_left_room top_right_room bottom_left_room bottom_right_room].freeze
+
+    POSITION_GROUPS = {
+      upstairs: %i[top_left_room top_right_room],
+      downstairs: %i[bottom_left_room bottom_right_room],
+      left_side: %i[top_left_room bottom_left_room],
+      right_side: %i[top_right_room bottom_right_room],
+    }.freeze
+
     attr_accessor :top_left_room
     attr_accessor :top_right_room
     attr_accessor :bottom_left_room

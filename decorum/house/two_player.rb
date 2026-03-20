@@ -1,10 +1,14 @@
 module Decorum
   class House
     class TwoPlayer < House
-      alias_attribute :bathroom, :top_left_room
-      alias_attribute :bedroom, :top_right_room
-      alias_attribute :living_room, :bottom_left_room
-      alias_attribute :kitchen, :bottom_right_room
+      ROOM_NAMES = {
+        bathroom: :top_left_room,
+        bedroom: :top_right_room,
+        living_room: :bottom_left_room,
+        kitchen: :bottom_right_room,
+      }.freeze
+
+      ROOM_NAMES.each { |name, position| alias_attribute name, position }
 
       def initialize
         self.top_left_room = Room.new(name: :bathroom, object_order: %i[curio wall_hanging lamp])

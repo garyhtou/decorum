@@ -1,0 +1,65 @@
+{
+  "name": "Welcome Home",
+  "house_type": "two_player",
+  "initial_state": {
+    "bathroom": {
+      "paint_color": "blue",
+      "curio": { "color": "blue", "style": "antique" },
+      "wall_hanging": { "color": "red", "style": "modern" }
+    },
+    "bedroom": {
+      "paint_color": "green",
+      "lamp": { "color": "green", "style": "unusual" }
+    },
+    "living_room": {
+      "paint_color": "yellow",
+      "lamp": { "color": "red", "style": "retro" }
+    },
+    "kitchen": {
+      "paint_color": "red",
+      "wall_hanging": { "color": "yellow", "style": "unusual" }
+    }
+  },
+  "players": [
+    {
+      "conditions": [
+        {
+          "scope": "left_side",
+          "subject": "lamps",
+          "assertion": { "count": { "max": 0 } }
+        },
+        {
+          "scope": "house",
+          "subject": "objects",
+          "filter": { "style": "antique" },
+          "assertion": { "count": { "max": 1 } }
+        },
+        {
+          "scope": "downstairs",
+          "subject": "objects",
+          "assertion": { "count": { "min": 2 } }
+        }
+      ]
+    },
+    {
+      "conditions": [
+        {
+          "scope": "left_side",
+          "subject": "paint_color",
+          "assertion": { "equals": "blue" }
+        },
+        {
+          "scope": "house",
+          "subject": "objects",
+          "filter": { "type": "lamp", "color": "yellow", "style": "antique" },
+          "assertion": { "count": { "min": 1 } }
+        },
+        {
+          "scope": "kitchen",
+          "subject": "objects",
+          "assertion": { "count": { "max": 0 } }
+        }
+      ]
+    }
+  ]
+}

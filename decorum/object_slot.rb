@@ -46,11 +46,11 @@ module Decorum
     def filled? = !empty?
 
     def warm_color?
-      %i[red yellow].include? name
+      %i[red yellow].include? color
     end
 
     def cool_color?
-      %i[green blue].include? name
+      %i[green blue].include? color
     end
 
     def description

@@ -3,14 +3,14 @@ module Decorum
     include ActiveModel::Model
     include HumanizedName
 
-    NAMES = %i[bedroom bathroom kitchen living_room]
+    NAMES = %i[bedroom bathroom kitchen living_room bedroom_a bedroom_b]
     attr_accessor :name
     validates :name, presence: true, inclusion: { in: NAMES }
 
     attr_accessor :paint_color
     validates :paint_color, presence: true, inclusion: { in: Decorum::COLORS }
 
-    OBJECTS = %i[lamp curio wall_hanging]
+    OBJECTS = ObjectSlot::TYPES
     attr_accessor :lamp
     attr_accessor :curio
     attr_accessor :wall_hanging

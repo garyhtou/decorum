@@ -10,7 +10,7 @@ module Decorum
         end
         house.bedroom.tap do |room|
           room.paint_color = :green
-          room.lamp.assign_attributes(style: :unique, color: :green)
+          room.lamp.assign_attributes(style: :unusual, color: :green)
         end
         house.living_room.tap do |room|
           room.paint_color = :yellow
@@ -18,7 +18,7 @@ module Decorum
         end
         house.kitchen.tap do |room|
           room.paint_color = :red
-          room.wall_hanging.assign_attributes(style: :unique, color: :yellow)
+          room.wall_hanging.assign_attributes(style: :unusual, color: :yellow)
         end
 
         new(
