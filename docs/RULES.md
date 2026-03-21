@@ -52,6 +52,8 @@ Each object has a **color** and a **style**. Not every combination exists - ther
 
 Each object type is available in all 4 colors and all 4 styles, but not every style is available in every color. For example, there are no "red antique" objects.
 
+The game supply contains **4 copies of each of the 12 specific objects** (48 tokens total).
+
 ## Colors
 
 There are 4 colors: **red**, **yellow**, **blue**, and **green**.
@@ -94,7 +96,7 @@ Each round, every player takes a turn consisting of 3 steps:
 
 Important: You cannot remove an object and add a different type on the same turn.
 
-**2. Fulfillment Check**: If all conditions on your card are met, declare "I'm fulfilled."
+**2. Fulfillment Check**: If all conditions on your card are met, declare "I'm fulfilled." Note: fulfillment is checked after every action — another player's action can cause you to lose fulfillment.
 
 **3. Comment from Partner**: Your partner responds to your action with a positive, negative, or neutral comment (e.g., "I love it!", "I hate it!", "Meh."). No other communication is allowed - no hints about specific conditions.
 
@@ -104,10 +106,10 @@ After both players take a turn, the round marker advances 1 space. The game has 
 
 ### Heart-to-Heart (2-Player)
 
-Three times during the game (at rounds 15, 20, and 25), players have a Heart-to-Heart:
+Three times during the game, players have a Heart-to-Heart. The first occurs at round 15. After the first Heart-to-Heart only, the round marker resets to 1. Subsequent Heart-to-Hearts occur at rounds 5 and 10 (on the reset track), with no further resets.
+
 1. Each player shares 1 of their conditions aloud
 2. Flip a heart token face-down and place it to the right of the round track
-3. After the first Heart-to-Heart, reset the round marker to 1
 
 Players may agree to skip ahead to the first Heart-to-Heart early.
 
@@ -119,14 +121,16 @@ Similar to Heart-to-Heart but occurs every 5 rounds (5 meetings total):
 3. Flip a heart token and reset the round marker
 
 Additional 3/4-player changes:
-- Any player may comment on any action (not just clockwise)
-- **Roommate Swap** action available: Move your token to the other bedroom, kicking out an occupant if needed
+- Comments are optional — any player who wants to may comment on any action (not just clockwise)
+- **Roommate Swap** action available: Move your token to the other bedroom, choosing which occupant to kick out if the room has multiple. In 3-player games, you may also swap into a bedroom with only one occupant (yourself), kicking them to the other room.
 - Conditions may refer to "your room" (the room with your roommate token)
+- Each player has **big condition cards** (kept secret, like 2P) and **small condition cards** that are shared during House Meetings. Small cards can be taken back and re-shared with a different player at a later meeting.
+- In 3-player games, the 4th player's small condition cards are distributed among the 3 players during setup.
 
 ## Ending the Game
 
 The game ends in 1 of 2 ways:
-1. Both players are fulfilled (all conditions on all cards met) - you win!
+1. All players are fulfilled (all conditions on all cards met) - you win!
 2. After 30 rounds with no heart tokens remaining - time's up
 
 ## Scoring
@@ -138,7 +142,7 @@ Winning sooner gives a bigger bonus (more remaining hearts), but only if every c
 
 Maximum scores:
 - 2-player (10 conditions): 36 points
-- 3/4-player (18 conditions): 46 points
+- 3/4-player (12 conditions): 46 points (12×3 + 5×2 = 46)
 
 ## Conditions
 
